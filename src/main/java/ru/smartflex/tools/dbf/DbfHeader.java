@@ -155,10 +155,31 @@ public class DbfHeader {
         }
     }
 
+    /**
+     * Safely reading header from file and network stream; git:frankvdh
+     * @return amount of reading bytes
+     */
+    private int readPartOfHeader(byte[] buff, int offset, int recordLength) throws Exception {
+        int ret = recordLength;
+
+        int numLeft = recordLength;
+        int offs = offset;
+        while (numLeft > 0) {
+            int numRead = dbfStream.read(buff, offs, numLeft);
+            if (numRead == -1) {
+                ret = -1;
+                break;
+            }
+            offs += numRead;
+            numLeft -= numRead;
+        }
+        return ret;
+    }
+
     private void parseDbfHeader() {
         try {
-            byte[] hdr = new byte[32];
-            int cnt = dbfStream.read(hdr);
+            byte[] hdr = new byte[DbfConstants.DBF_HEADER_LENGTH];
+            int cnt = readPartOfHeader(hdr, 0, DbfConstants.DBF_HEADER_LENGTH);
             if (cnt != DbfConstants.DBF_HEADER_LENGTH) {
                 dbfStream.close();
                 throw new DbfEngineException(DbfConstants.EXCP_HEADER_INF);
@@ -189,10 +210,10 @@ public class DbfHeader {
                     codePage = dcp.getCharsetName();
                 }
             }
-            int currentOffset = 32;
+            int currentOffset = DbfConstants.DBF_HEADER_LENGTH;
 
             // Fields
-            byte[] fld = new byte[32];
+            byte[] fld = new byte[DbfConstants.DBF_COLUMN_LENGTH];
             boolean next = true;
             do {
                 int flagByte = dbfStream.read();
@@ -205,7 +226,7 @@ public class DbfHeader {
                 currentOffset++;
                 if (next) {
                     fld[0] = (byte) flagByte;
-                    flagByte = dbfStream.read(fld, 1, 31);
+                    flagByte = readPartOfHeader(fld, 1, DbfConstants.DBF_COLUMN_LENGTH - 1);
                     if (flagByte == -1) {
                         throw new DbfEngineException(DbfConstants.EXCP_HEADER_END);
                     }

@@ -1,7 +1,7 @@
 # DbfEngine Java API
 
 DbfEngine - a Java API to read, write xBase(DBASE, Foxpro dbf files). Also API allows read memory files (.mem) of Foxpro.
-Samples for both operations you may see at [DbfEngine javadoc](http://www.smart-flex.ru/htm/de_api/index.html)
+Samples for both operations you may see at [DbfEngine javadoc](https://www.smart-flex.ru/htm/de_api/index.html)
 
 This API is pure lightweight library without memory consumption and any third party libraries (there are no java loggers and etc.)
 The DBF Java API is intended as engine for data exchange purposes

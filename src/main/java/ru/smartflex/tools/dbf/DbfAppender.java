@@ -190,15 +190,26 @@ public class DbfAppender {
 
             if (dbfStatement != null) {
                 InputStream dbfBody = dbfStatement.getDbfBodyInputStream();
-                int recordLength = dbfHeader.getLengthRecord();
+                final int recordLength = dbfHeader.getLengthRecord();
                 byte[] rec = new byte[recordLength];
-                int flag;
+                boolean flag = true;
                 do {
-                    flag = dbfBody.read(rec, 0, recordLength);
-                    if (flag != -1) {
-                        dbfStream.write(rec, 0, flag);
+                    // 08.01.2020 fix bug with stream reading; git:frankvdh
+                    int numLeft = recordLength;
+                    int offs = 0;
+                    while (numLeft > 0) {
+                        int numRead = dbfBody.read(rec, offs, numLeft);
+                        if (numRead == -1) {
+                            flag = false;
+                            break;
+                        }
+                        offs += numRead;
+                        numLeft -= numRead;
                     }
-                } while (flag != -1);
+                    if (flag) {
+                        dbfStream.write(rec, 0, recordLength);
+                    }
+                } while (flag);
                 dbfBody.close();
             }
 

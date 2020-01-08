@@ -3,6 +3,7 @@ Version history
 
 |Date      | Ver | Author                      | Description        |
 |----------|-----|-----------------------------|--------------------|
+|2020-01-08| 1.10| frankvdh, galisha.          | Fixed two issues: 1) Column names not upper case 2) Buffer reads are not stream-safe |
 |2019-07-10| 1.09| galisha.                    | Added handling for such bad numeric as: 1219,.0000 |
 |2016-10-16| 1.08| galisha.                    | Added validation rules for dbf header in case handling of non-dbf files. |
 |2016-07-11| 1.07| galisha.                    | Issued executable command line jar file. It's allows to parse dbf file from OOTB. Fixed error with reading unexpected zero in header of DBF and some code pages. **Sample of usage** : java -jar dbfEngine_bin-1.07.jar your.dbf |

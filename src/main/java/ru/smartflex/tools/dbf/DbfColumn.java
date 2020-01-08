@@ -90,7 +90,8 @@ public class DbfColumn {
         int columnDotAmount = recField[17] & 0xff;
         for (int i = 0; i <= 10; i++) {
             if (recField[i] == 0) {
-                columnName = new String(recField, 0, i);
+                // 08.01.2020 fix case for dbf in Shapefile which has columns in lower case; git:frankvdh
+                columnName = new String(recField, 0, i).toUpperCase();
                 break;
             }
         }
