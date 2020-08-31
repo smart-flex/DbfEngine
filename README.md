@@ -12,7 +12,7 @@ Engine is very small and fast.
 API for reading is made as iterator, API for writing is made in manner as JDBC statement. It is allows to write compact Java code.
 
 Also, you can look inside your dbf file by invoking it through command line:
-java -jar dbfEngine_bin-1.10.jar your.dbf
+java -jar dbfEngine_bin-1.11.jar your.dbf
 
 The result of parsing dbf header and content will be saved into text file.
 
@@ -48,6 +48,7 @@ public class Fp26Reader {
         Fp26Reader.testRead();
     }
 }
+
 public class Fp26Writer {
     private static void testWrite() {
         DbfAppender dbfAppender = DbfEngine.getWriter("WRT_PERSON.DBF", DbfCodePages.Cp866);
