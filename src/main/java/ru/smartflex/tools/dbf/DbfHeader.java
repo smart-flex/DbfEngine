@@ -31,6 +31,7 @@ public class DbfHeader {
     private List<DbfColumn> orderedColumns = new ArrayList<DbfColumn>();
 
     private DbfIterator dbfIterator = null;
+    private DbfCodePages dbfCodePages = null;
 
     protected DbfHeader(File dbfFile, String enc, DbfIterator dbfIterator) {
         // Open for reading
@@ -116,6 +117,9 @@ public class DbfHeader {
     private void codePageHandling(String enc) {
         if (enc != null) {
             defaultCodePage = enc;
+            if (DbfCodePages.getByCharsetName(enc) == null) {
+                throw new DbfEngineException(DbfConstants.EXCP_CODE_PAGE + ": " + enc);
+            }
         }
     }
 
@@ -202,12 +206,14 @@ public class DbfHeader {
             // System.out.println("cp "+cp);
             if (cp == 0) {
                 codePage = defaultCodePage;
+                dbfCodePages = DbfCodePages.getByCharsetName(defaultCodePage);
             } else {
-                DbfCodePages dcp = DbfCodePages.Cp1251.getByDbfCode(cp);
+                DbfCodePages dcp = DbfCodePages.getByDbfCode(cp);
                 if (dcp == null) {
                     throw new DbfEngineException(DbfConstants.EXCP_CODE_PAGE);
                 } else {
                     codePage = dcp.getCharsetName();
+                    dbfCodePages = dcp;
                 }
             }
             int currentOffset = DbfConstants.DBF_HEADER_LENGTH;
@@ -350,4 +356,12 @@ public class DbfHeader {
         return fok;
     }
 
+    /**
+     * Gets dbf code page
+     * @return dbf code page
+     * @since 1.11
+     */
+    protected DbfCodePages getDbfCodePages() {
+        return dbfCodePages;
+    }
 }

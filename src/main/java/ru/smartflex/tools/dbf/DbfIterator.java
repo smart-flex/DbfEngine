@@ -77,7 +77,7 @@ public class DbfIterator {
                 try {
                     finishOrDeleteFLag = dbfStream.read() & 0xff;
                 } catch (IOException e) {
-                    throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR);
+                    throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR, e);
                 }
             }
             // flag was read
@@ -125,7 +125,7 @@ public class DbfIterator {
 
                 finishOrDeleteFLag = NON_FILLED_FLAG;
             } catch (IOException e) {
-                throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR);
+                throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR, e);
             }
             return dbfRecord;
         }

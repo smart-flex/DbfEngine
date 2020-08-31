@@ -42,6 +42,55 @@ public class DbfWriterTest {
             writeDbf.delete();
         }
 
+        writeTwoRecordsToDbf(writeDbf);
+
+        DbfHeader dbfHeader = DbfEngine.getHeader(writeDbf, null);
+
+        System.out.println("DBF header info: " + dbfHeader.toString());
+
+        assertEquals("Cp866", dbfHeader.getCodePage());
+        assertEquals(5, dbfHeader.getCountColumns());
+        assertEquals(2, dbfHeader.getCountRecords());
+
+        dbfHeader.closeDbfHeader();
+
+        writeDbf.delete();
+    }
+
+    @Test
+    public void testAppendDbf() {
+        File writeDbf = new File("WRT_PERSON.DBF");
+        if (writeDbf.exists()) {
+            writeDbf.delete();
+        }
+
+        writeTwoRecordsToDbf(writeDbf);
+
+        DbfAppender dbfAppender = DbfEngine.getAppender(writeDbf, "Cp866");
+
+        DbfStatement statement = dbfAppender.getStatement();
+        statement.setString("actor", "Jean-Claude Van Damme");
+        statement.setDate("currdate", new Date());
+        statement.setBigDecimal("hit", new BigDecimal("450.5"));
+        statement.insertStatement();
+
+        dbfAppender.writeDbfAndClose();
+
+        DbfHeader dbfHeader = DbfEngine.getHeader(writeDbf, null);
+
+        System.out.println("DBF header info: " + dbfHeader.toString());
+
+        assertEquals("Cp866", dbfHeader.getCodePage());
+        assertEquals(5, dbfHeader.getCountColumns());
+        assertEquals(3, dbfHeader.getCountRecords());
+
+        dbfHeader.closeDbfHeader();
+
+        writeDbf.delete();
+    }
+
+    private void writeTwoRecordsToDbf(File writeDbf) {
+
         DbfAppender dbfAppender = DbfEngine.getWriter(writeDbf, DbfCodePages.Cp866);
         DbfColumn dc01 = new DbfColumn("magic", DbfColumnTypes.Logical, 0, 0);
         DbfColumn dc02 = new DbfColumn("actor", DbfColumnTypes.Character, 60, 0);
@@ -64,16 +113,5 @@ public class DbfWriterTest {
 
         dbfAppender.writeDbfAndClose();
 
-        DbfHeader dbfHeader = DbfEngine.getHeader(writeDbf, null);
-
-        System.out.println("DBF header info: " + dbfHeader.toString());
-
-        assertEquals("Cp866", dbfHeader.getCodePage());
-        assertEquals(5, dbfHeader.getCountColumns());
-        assertEquals(2, dbfHeader.getCountRecords());
-
-        dbfHeader.closeDbfHeader();
-
-        writeDbf.delete();
     }
 }

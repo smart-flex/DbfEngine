@@ -6,8 +6,8 @@
 
     <groupId>ru.smartflex.tools.dbf</groupId>
     <artifactId>DbfEngine</artifactId>
-    <version>1.10</version>
-    <name>DbfEngine - a small Java library to read, write xBase(DBASE, Foxpro dbf/mem files)</name>
+    <version>1.11</version>
+    <name>DbfEngine - a small Java library to read, write, append xBase(DBASE, Foxpro dbf/mem files)</name>
 
     <properties>
         <junit.version>4.12</junit.version>

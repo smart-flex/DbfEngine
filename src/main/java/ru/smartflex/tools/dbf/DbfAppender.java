@@ -1,11 +1,6 @@
 package ru.smartflex.tools.dbf;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -29,18 +24,34 @@ public class DbfAppender {
     private OutputStream dbfStream = null;
     private DbfStatement dbfStatement = null;
 
+    private File dbfFileExisted = null;
+    private boolean flagAppendExistedFile = false;
+
     DbfAppender(File dbfFile, DbfCodePages dbfCodePage) {
         this.dbfCodePage = dbfCodePage;
         if (dbfCodePage == null) {
             throw new DbfEngineException(DbfConstants.EXCP_CP_MISSED);
         }
-        createOutputStream(dbfFile);
+        createOutputStream(dbfFile, false);
     }
 
-    private void createOutputStream(File dbfFile) {
+    /**
+     * Constructor for existed file
+     * @param dbfFile dbf file
+     * @param dbfHeader header of dbf file
+     * @since 1.11
+     */
+    DbfAppender(File dbfFile, DbfHeader dbfHeader) {
+        this.dbfFileExisted = dbfFile;
+        this.dbfHeader = dbfHeader;
+        this.dbfCodePage = dbfHeader.getDbfCodePages();
+        flagAppendExistedFile = true;
+    }
+
+    private void createOutputStream(File dbfFile, boolean append) {
         if (dbfStream == null) {
             try {
-                dbfStream = new FileOutputStream(dbfFile);
+                dbfStream = new FileOutputStream(dbfFile, append);
             } catch (FileNotFoundException e) {
                 throw new DbfEngineException(DbfConstants.EXCP_DBF_ERR_CREATE,
                         e);
@@ -63,6 +74,9 @@ public class DbfAppender {
      * @since 1.00
      */
     public void defineColumns(DbfColumn... dbfColumns) {
+        if (flagAppendExistedFile) {
+            throw new DbfEngineException(DbfConstants.EXCP_DEF_COLS_NOT_ALLOWED);
+        }
         if (dbfColumns.length == 0) {
             throw new DbfEngineException(DbfConstants.EXCP_COLUMN_ADD);
         }
@@ -92,6 +106,14 @@ public class DbfAppender {
      * @since 1.00
      */
     public void writeDbfAndClose() {
+        if (flagAppendExistedFile) {
+            writeDbfAndCloseForAppendMode();
+        } else {
+            writeDbfAndCloseForWriteMode();
+        }
+    }
+
+    private void writeDbfAndCloseForWriteMode() {
 
         if (dbfHeader == null) {
             throw new DbfEngineException(DbfConstants.EXCP_COLUMN_ADD);
@@ -182,11 +204,63 @@ public class DbfAppender {
         recordAmount++;
     }
 
+    private void writeDbfAndCloseForAppendMode() {
+        if (recordAmount == 0) {
+            // no one record were added. Therefore return.
+            return;
+        }
+
+        byte[] header = new byte[7];
+        lockCalendar.lock();
+        try {
+            calendar.setTime(new Date());
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+            int month = calendar.get(Calendar.MONTH);
+            int year = calendar.get(Calendar.YEAR) % 100;
+            header[0] = (byte) year;
+            header[1] = (byte) month;
+            header[2] = (byte) day;
+        } finally {
+            lockCalendar.unlock();
+        }
+        int totalRecords = dbfHeader.getCountRecords() + recordAmount;
+        header[3] = (byte) totalRecords;
+        header[4] = (byte) (totalRecords >> 8);
+        header[5] = (byte) (totalRecords >> 16);
+        header[6] = (byte) (totalRecords >> 24);
+
+        // change dbf header of existed file
+        RandomAccessFile randomFile = null;
+        try {
+            randomFile = new RandomAccessFile(dbfFileExisted, "rw");
+            randomFile.seek(1);
+            randomFile.write(header);
+        } catch (FileNotFoundException e) {
+            throw new DbfEngineException(DbfConstants.EXCP_DBF_NOT_EXISTS, e);
+        } catch (IOException e) {
+            throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR, e);
+        } finally {
+            if (randomFile != null) {
+                try {
+                    randomFile.close();
+                } catch (Exception e) {
+                    throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR, e);
+                }
+            }
+        }
+
+        createOutputStream(dbfFileExisted, true);
+
+        writeDbf(null, null);
+    }
+
     private void writeDbf(byte[] header, byte[] columns) {
         try {
-            dbfStream.write(header);
-            dbfStream.write(columns);
-            dbfStream.write(DbfConstants.DBF_END_HEADER);
+            if (!flagAppendExistedFile) {
+                dbfStream.write(header);
+                dbfStream.write(columns);
+                dbfStream.write(DbfConstants.DBF_END_HEADER);
+            }
 
             if (dbfStatement != null) {
                 InputStream dbfBody = dbfStatement.getDbfBodyInputStream();
@@ -216,7 +290,7 @@ public class DbfAppender {
             dbfStream.flush();
             dbfStream.close();
         } catch (IOException e) {
-            throw new DbfEngineException(DbfConstants.EXCP_COLUMN_ADD, e);
+            throw new DbfEngineException(DbfConstants.EXCP_IO_ERROR, e);
         }
     }
 

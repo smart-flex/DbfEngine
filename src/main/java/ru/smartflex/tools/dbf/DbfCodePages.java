@@ -46,11 +46,30 @@ public enum DbfCodePages {
         return charsetName;
     }
 
-    protected DbfCodePages getByDbfCode(int code) {
+    protected static DbfCodePages getByDbfCode(int code) {
         DbfCodePages dcp = null;
 
         for (DbfCodePages dcps : DbfCodePages.values()) {
             if (dcps.getDbfCode() == code) {
+                dcp = dcps;
+                break;
+            }
+        }
+
+        return dcp;
+    }
+
+    /**
+     * Defines DbfCodePage by charset name
+     * @param charsetName charset name
+     * @return DbfCodePages
+     * @since 1.11
+     */
+    protected static DbfCodePages getByCharsetName(String charsetName) {
+        DbfCodePages dcp = null;
+
+        for (DbfCodePages dcps : DbfCodePages.values()) {
+            if (dcps.getCharsetName().equals((charsetName))) {
                 dcp = dcps;
                 break;
             }

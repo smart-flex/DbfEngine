@@ -96,7 +96,7 @@ public class DbfEngine {
      * Gets DBF header.
      *
      * @param dbfFileName dbf file name
-     * @param enc         If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf header
      * @since 1.05
      */
@@ -110,7 +110,7 @@ public class DbfEngine {
      *
      * @param path        path to the folder
      * @param dbfFileName dbf file name
-     * @param enc         If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf header
      * @since 1.05
      */
@@ -124,7 +124,7 @@ public class DbfEngine {
      * Gets DBF header.
      *
      * @param dbfFile dbf file
-     * @param enc     If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf header
      * @since 1.05
      */
@@ -137,7 +137,7 @@ public class DbfEngine {
      * Gets DBF header.
      *
      * @param dbfStream input stream
-     * @param enc       If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf header
      * @since 1.05
      */
@@ -150,7 +150,7 @@ public class DbfEngine {
      * Gets DBF iterator
      *
      * @param dbfFileName dbf file name
-     * @param enc         If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf iterator
      * @since 1.00
      */
@@ -164,7 +164,7 @@ public class DbfEngine {
      *
      * @param path        path to the folder
      * @param dbfFileName dbf file name
-     * @param enc         If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf iterator
      * @since 1.00
      */
@@ -178,7 +178,7 @@ public class DbfEngine {
      * Gets DBF iterator
      *
      * @param dbfFile dbf file
-     * @param enc     If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf iterator
      * @since 1.00
      */
@@ -190,7 +190,7 @@ public class DbfEngine {
      * Gets DBF iterator
      *
      * @param dbfStream input stream
-     * @param enc       If codepage in dbf file is missed(in other words == null) then this parameter filled as Cp866
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
      * @return dbf iterator
      * @since 1.00
      */
@@ -199,7 +199,7 @@ public class DbfEngine {
     }
 
     /**
-     * Gets DBF appender
+     * Gets DBF appender for a newly created file
      *
      * @param path        path to the folder
      * @param dbfFileName dbf file name
@@ -214,7 +214,7 @@ public class DbfEngine {
     }
 
     /**
-     * Gets DBF appender
+     * Gets DBF appender for a newly created file
      *
      * @param dbfFileName dbf file name
      * @param dbfCodePage dbf code page
@@ -228,7 +228,7 @@ public class DbfEngine {
     }
 
     /**
-     * Gets DBF appender
+     * Gets DBF appender for a newly created file
      *
      * @param dbfFile     dbf file
      * @param dbfCodePage dbf code page
@@ -243,7 +243,7 @@ public class DbfEngine {
     }
 
     /**
-     * Gets DBF appender
+     * Gets DBF appender for a newly created file
      *
      * @param dbfStream   output stream
      * @param dbfCodePage dbf code page
@@ -253,6 +253,52 @@ public class DbfEngine {
     public static DbfAppender getWriter(OutputStream dbfStream,
                                         DbfCodePages dbfCodePage) {
         return new DbfAppender(dbfStream, dbfCodePage);
+    }
+
+    /**
+     * Gets DBF appender for existed file
+     *
+     * @param dbfFileName dbf file name
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
+     * @return dbf appender
+     * @since 1.11
+     */
+    public static DbfAppender getAppender(String dbfFileName, String enc) {
+        File dbfFile = new File(dbfFileName);
+        return getAppender(dbfFile, enc);
+    }
+
+    /**
+     * Gets DBF appender for existed file
+     *
+     * @param path        path to the folder
+     * @param dbfFileName dbf file name
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
+     * @return dbf appender
+     * @since 1.11
+     */
+    public static DbfAppender getAppender(String path, String dbfFileName,
+                                        String enc) {
+        File dbfFile = new File(path, dbfFileName);
+        return getAppender(dbfFile, enc);
+    }
+
+    /**
+     * Gets DBF appender for existed file
+     *
+     * @param dbfFile     dbf file
+     * @param enc If codepage parameter is missed (in other words == null) then it will be filled as Cp866. And this parameter will be used if in DBF header code page is unknown.
+     * @return dbf appender
+     * @since 1.11
+     */
+    public static DbfAppender getAppender(File dbfFile, String enc) {
+        if (!dbfFile.exists()) {
+            throw new DbfEngineException(DbfConstants.EXCP_DBF_NOT_EXISTS);
+        }
+        DbfIterator iter = new DbfIterator(dbfFile, enc);
+        DbfHeader header = iter.getDbfHeader();
+        iter.closeIterator();
+        return new DbfAppender(dbfFile, header);
     }
 
 }

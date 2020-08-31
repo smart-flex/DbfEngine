@@ -26,6 +26,8 @@ public interface DbfConstants {
     String EXCP_DBF_EXISTS = "File is existed already";
     String EXCP_DBF_ERR_CREATE = "Error with file creating";
     String EXCP_CURR_REC_INFO = " on record: ";
+    String EXCP_DBF_NOT_EXISTS = "File is not existed";
+    String EXCP_DEF_COLS_NOT_ALLOWED = "Define columns is not allowed for append mode of existed file";
 
     String EXCP_COLUMN_ADD = "There were no column added";
     String EXCP_COLUMN_EMPTY = "Column has to be named";

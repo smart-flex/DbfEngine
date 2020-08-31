@@ -3,6 +3,7 @@ Version history
 
 |Date      | Ver | Author                      | Description        |
 |----------|-----|-----------------------------|--------------------|
+|2020-08-31| 1.11| galisha.                    | Added ability of append records to existed DBF file. |
 |2020-01-08| 1.10| frankvdh, galisha.          | Fixed two issues: 1) Column names not upper case 2) Buffer reads are not stream-safe |
 |2019-07-10| 1.09| galisha.                    | Added handling for such bad numeric as: 1219,.0000 |
 |2016-10-16| 1.08| galisha.                    | Added validation rules for dbf header in case handling of non-dbf files. |
