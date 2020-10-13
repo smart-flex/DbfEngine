@@ -10,7 +10,7 @@
     <name>DbfEngine - a small Java library to read, write, append xBase(DBASE, Foxpro dbf/mem files)</name>
 
     <properties>
-        <junit.version>4.12</junit.version>
+        <junit.version>4.13.1</junit.version>
     </properties>
 
     <dependencies>
