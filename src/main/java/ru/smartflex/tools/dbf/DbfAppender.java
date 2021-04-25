@@ -101,6 +101,25 @@ public class DbfAppender {
     }
 
     /**
+     * Defines columns for dbf file based on source header of dbf file.
+     * @param header source header of dbf file
+     * @since 1.12
+     */
+    public void defineColumns(DbfHeader header) {
+        if (flagAppendExistedFile) {
+            throw new DbfEngineException(DbfConstants.EXCP_DEF_COLS_NOT_ALLOWED);
+        }
+        if (header.getOrderedColumnList().size() == 0) {
+            throw new DbfEngineException(DbfConstants.EXCP_COLUMN_ADD);
+        }
+        dbfHeader = new DbfHeader();
+
+        for (DbfColumn dc : header.getOrderedColumnList()) {
+            dbfHeader.addColumn(dc);
+        }
+    }
+
+    /**
      * Writes records into dbf file and then closes it.
      *
      * @since 1.00

@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Iterator;
 
 import static org.junit.Assert.assertEquals;
 
@@ -87,6 +88,38 @@ public class DbfWriterTest {
         dbfHeader.closeDbfHeader();
 
         writeDbf.delete();
+    }
+
+    @Test
+    public void testDbfCloning() {
+
+        DbfHeader dbfHeader = DbfEngine.getHeader(
+                TestHelper.getFile("FP_26_SAMPLE.DBF"), null);
+        DbfIterator dbfIterator = dbfHeader.getDbfIterator();
+        System.out.println("DBF header info: " + dbfHeader.toString());
+
+        Iterator<DbfColumn> iter = dbfHeader.getColumnIterator();
+        while (iter.hasNext()) {
+            DbfColumn column = iter.next();
+            System.out.println(column.getColumnName() + " " + column.getDbfColumnType() + " " + column.getDbfColumnPosition().getColumnLength());
+        }
+
+        File cloneDbf = new File("FP_26_SAMPLE_CLONE.DBF");
+        if (cloneDbf.exists()) {
+            cloneDbf.delete();
+        }
+        DbfAppender dbfAppender = DbfEngine.getWriter(cloneDbf, DbfCodePages.Cp866);
+        dbfAppender.defineColumns(dbfHeader);
+
+        while (dbfIterator.hasMoreRecords()) {
+            DbfRecord dbfRecord = dbfIterator.nextRecord();
+            DbfStatement statement = dbfAppender.getStatement();
+            statement.fillStatement(dbfRecord);
+            statement.insertStatement();
+        }
+
+        dbfAppender.writeDbfAndClose();
+        dbfHeader.closeDbfHeader();
     }
 
     private void writeTwoRecordsToDbf(File writeDbf) {

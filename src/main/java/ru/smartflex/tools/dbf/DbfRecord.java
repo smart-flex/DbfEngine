@@ -346,4 +346,13 @@ public class DbfRecord {
     public int getCurrentRecord() {
         return currentRecord;
     }
+
+    /**
+     * Return record
+     * @return current record as byte array
+     * @since 1.12
+     */
+    byte[] getRecord() {
+        return record;
+    }
 }

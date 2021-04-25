@@ -1,6 +1,6 @@
 # DbfEngine Java API
 
-DbfEngine - a Java API to read, write and append xBase(DBASE, Foxpro dbf files). Also API allows read memory files (.mem) of Foxpro.
+DbfEngine - a Java API to read, write, append and clone xBase(DBASE, Foxpro dbf files). Also API allows read memory files (.mem) of Foxpro.
 Samples for both operations you can see at [DbfEngine javadoc](https://smart-flex.ru/htm/de_api/index.html)
 
 This API is pure lightweight library without memory consumption and any third party libraries (there are no java loggers and etc.)
@@ -81,7 +81,60 @@ public class Fp26Writer {
         Fp26Writer.testWrite();
     }
 }
+
+public class DbfClonePerformance {
+
+	private static void cloneDBF(String srcFile, String cloneFile) {
+		File room64File = new File(srcFile);
+		System.out.println("Length src file (bytes): " + room64File.length() + " (megabytes): " + room64File.length()/(1024*1024));
+		DbfHeader header = DbfEngine.getHeader(room64File, "Cp866");
+		System.out.println(header.toString());
+		DbfIterator dbfIterator = header.getDbfIterator();
+
+		File cloneDbf = new File(cloneFile);
+		if (cloneDbf.exists()) {
+			cloneDbf.delete();
+		}
+		DbfAppender dbfAppender = DbfEngine.getWriter(cloneDbf,
+				DbfCodePages.Cp866);
+		dbfAppender.defineColumns(header);
+
+		while (dbfIterator.hasMoreRecords()) {
+			DbfRecord dbfRecord = dbfIterator.nextRecord();
+
+			// here can be your filtering code ....
+			
+			DbfStatement statement = dbfAppender.getStatement();
+			statement.fillStatement(dbfRecord);
+			statement.insertStatement();
+		}
+
+		dbfAppender.writeDbfAndClose();
+		header.closeDbfHeader();
+	}
+
+	public static void main(String[] args) {
+
+		long start = System.currentTimeMillis();
+		
+		cloneDBF("F:\\fias_dbf\\ROOM64.DBF",
+				"F:\\fias_dbf\\ROOM64_CLONE.DBF");
+
+		long finish = System.currentTimeMillis();
+		
+		System.out.println("Clone finished for: " + (finish - start)/1000 + " sec");
+	}
+}
 ```
+#### Performance
+
+The result of performance are (below is the work log of DbfClonePerformance class):
+
+* Length src file (bytes): 600606501 (megabytes): 572
+* DbfHeader [firstRecordPosition=641, countRecords=1078287, countColumns=19, lengthRecord=557, codePage=Cp866, typeDbf={3,FoxBASE_dBASE_III_PLUS_without_memo}]
+* Clone finished for: 52 sec
+
+This java code is worked under jdk1.6/32; Intel Core i3; Windows 10. And there is no one messages such as: java.lang.OutOfMemoryError: Java heap space
 
 #### Licensing
 

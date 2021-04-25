@@ -247,4 +247,8 @@ public class DbfStatement {
         return dbfColumnPos;
     }
 
+    public void fillStatement(DbfRecord dbfRecord) {
+        System.arraycopy(dbfRecord.getRecord(), 0, rec, 0, rec.length);
+    }
+
 }
